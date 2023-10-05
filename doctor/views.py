@@ -7,6 +7,7 @@ from typing import Final
 from django.db.models import Q
 from rest_framework import status
 from datetime import datetime
+from django.core.exceptions import ObjectDoesNotExist
 
 max_appointment: Final = 5
 day : Final = {
@@ -25,9 +26,13 @@ day : Final = {
 def doctor_api(request,pk=None):
     id=pk
     if id is not None:
-        dc=Doctor.objects.get(pk=id)
-        serializer=DoctorSerializer(dc)
-        return Response(serializer.data)
+        try:
+            dc=Doctor.objects.get(pk=id)
+            serializer=DoctorSerializer(dc)
+            return Response(serializer.data)
+        except ObjectDoesNotExist:
+            invalid_id={'message':'No doctor is listed with the given id'}
+            return Response(invalid_id,status=status.HTTP_404_NOT_FOUND)
     dc=Doctor.objects.all()
     serializer=DoctorSerializer(dc,many=True)
     return Response(serializer.data)
