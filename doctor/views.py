@@ -45,7 +45,7 @@ def appointment_api(request):
     dc=Doctor.objects.get(pk=int(doctor))
     if dc is None or dc.weekly_schedule != appointment_day:
         invalid_date = {
-            'message':'Doctor is not available on the given date'
+            'message':f'{dc.name} is only available on {dc.weekly_schedule}'
         }
         return Response(invalid_date,status=status.HTTP_406_NOT_ACCEPTABLE)
     ap=Appointment.objects.filter(Q(doctor=doctor) & Q(date=appointment_date))
@@ -55,11 +55,11 @@ def appointment_api(request):
         if serializer.is_valid():
             serializer.save()
             success_msg={
-                "message":"Appointment scheduled on "+appointment_date
+                'message':f'Appointment scheduled on {appointment_date}'
             }
             return Response(success_msg,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     limit_exceed = {
-        'message': 'Appointment is full on '+ appointment_date
+        'message': f'Appointment is full on {appointment_date}'
     }
     return Response(limit_exceed,status=status.HTTP_406_NOT_ACCEPTABLE);
